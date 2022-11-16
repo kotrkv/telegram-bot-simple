@@ -1,25 +1,33 @@
 package com.kotrkv.service;
 
 import com.kotrkv.config.BotConfig;
+import com.kotrkv.model.entity.UserData;
+import com.kotrkv.repository.UserRepository;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class TelegramBotService extends TelegramLongPollingBot {
-
-    private final BotConfig botConfig;
+    @Autowired
+    private UserRepository userRepository;
+    private BotConfig botConfig;
     private final String HELP_TEXT_MESSAGE = "This is help message";
 
     public TelegramBotService(BotConfig botConfig) {
@@ -53,6 +61,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
             Long chatId = update.getMessage().getChatId();
             switch (message) {
                 case "/start": {
+                    registerUser(update.getMessage());
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
                 }
@@ -63,6 +72,19 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 default:
                     sendMessage(chatId, "Sorry...");
             }
+        }
+    }
+
+    private void registerUser(Message message) {
+        Optional<UserData> byId = userRepository.findById(message.getChatId());
+        if (byId.isEmpty()) {
+            UserData userData = new UserData();
+            userData.setChatId(message.getChatId());
+            userData.setFirstName(message.getChat().getFirstName());
+            userData.setLastName(message.getChat().getLastName());
+            userData.setUserName(message.getChat().getUserName());
+            userData.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
+            userRepository.save(userData);
         }
     }
 
