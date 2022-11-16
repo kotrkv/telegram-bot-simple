@@ -1,6 +1,6 @@
 package com.kotrkv.config;
 
-import com.kotrkv.service.TelegramBotService;
+import com.kotrkv.model.TelegramBot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -12,7 +12,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Component
 public class BotInitializer {
     @Autowired
-    TelegramBotService telegramBot;
+    TelegramBot telegramBot;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {

@@ -1,10 +1,9 @@
-package com.kotrkv.service;
+package com.kotrkv.model;
 
 import com.kotrkv.config.BotConfig;
 import com.kotrkv.model.entity.UserData;
 import com.kotrkv.repository.UserRepository;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,13 +23,13 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class TelegramBotService extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private UserRepository userRepository;
     private BotConfig botConfig;
     private final String HELP_TEXT_MESSAGE = "This is help message";
 
-    public TelegramBotService(BotConfig botConfig) {
+    public TelegramBot(BotConfig botConfig) {
         this.botConfig = botConfig;
         List<BotCommand> botCommands = new ArrayList<>();
         botCommands.add(new BotCommand("/start", "Начало работы с ботом"));
@@ -89,7 +88,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
     }
 
     private void startCommandReceived(Long chatId, String firstName) {
-        String answer = "Hi, " + firstName + ", nice to meet yot!";
+        String answer = EmojiParser.parseToUnicode("Hi, " + firstName + ", nice to meet you!" + " :blush:");
         sendMessage(chatId, answer);
     }
 
